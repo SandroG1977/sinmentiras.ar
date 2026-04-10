@@ -1,0 +1,131 @@
+import React, { useState } from 'react';
+import {
+    Search,
+    ShieldCheck,
+    FileText,
+    Scale,
+    CheckCircle2,
+    XCircle,
+    MessageSquare,
+    Fingerprint,
+    Mail,
+    ArrowRight,
+    ShieldAlert,
+    Clock,
+    ExternalLink,
+    ChevronRight,
+    Globe
+} from 'lucide-react';
+
+
+const App = () => {
+    const [view, setView] = useState('home'); // home, resolution, roadmap
+    const [query, setQuery] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState(null);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (!query) return;
+        setLoading(true);
+        setTimeout(() => {
+            setResult(MOCK_RESOLUTION);
+            setLoading(false);
+            setView('resolution');
+        }, 1200);
+    };
+
+    const Nav = () => (
+        <nav className="flex items-center justify-between px-10 py-5 bg-slate-950/50 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
+                <div className="bg-blue-600 p-1.5 rounded-lg shadow-lg shadow-blue-600/20">
+                    <Scale className="text-white w-6 h-6" />
+                </div>
+                <span className="text-xl font-black tracking-tighter text-white uppercase italic">SINMENTIRAS<span className="text-blue-500">.AR</span></span>
+            </div>
+            <div className="hidden md:flex gap-8 text-[11px] font-black uppercase tracking-widest text-slate-500">
+                <button onClick={() => setView('home')} className={`hover:text-white transition-all ${view === 'home' ? 'text-white border-b-2 border-blue-500 pb-1' : ''}`}>Auditoría</button>
+                <button onClick={() => setView('roadmap')} className={`hover:text-white transition-all ${view === 'roadmap' ? 'text-white border-b-2 border-blue-500 pb-1' : ''}`}>Roadmap</button>
+                <div className="flex items-center gap-2 bg-slate-900 px-3 py-1 rounded-full border border-white/5">
+                    <Globe className="text-emerald-500 w-3 h-3 animate-pulse" />
+                    <span className="text-slate-400">Fuentes 100% Públicas</span>
+                </div>
+            </div>
+        </nav>
+    );
+
+    const HomeView = () => (
+        <div className="max-w-5xl mx-auto mt-24 px-6 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-8">
+                <ShieldCheck size={14} /> Auditoría de Datos de Dominio Público
+            </div>
+            <h1 className="text-6xl font-black text-white mb-8 tracking-tighter leading-[0.95]">
+                MATEMÁTICA CONTRA <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-400">EL RELATO POLÍTICO.</span>
+            </h1>
+            <p className="text-slate-400 text-xl mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
+                Contrastá cualquier declaración con la base de datos oficial del <span className="text-white font-bold underline decoration-blue-500">Boletín Oficial</span> y el <span className="text-white font-bold underline decoration-blue-500">Congreso</span>.
+            </p>
+
+            <form onSubmit={handleSearch} className="relative max-w-3xl mx-auto group">
+                <div className="absolute inset-0 bg-blue-600/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Ej: ¿Qué dice el DNU sobre las cuotas en indemnizaciones?"
+                    className="relative w-full bg-slate-900 border border-white/10 rounded-3xl py-7 px-8 pr-24 text-white text-lg placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xl transition-all"
+                />
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="absolute right-4 top-4 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-2xl transition-all shadow-lg shadow-blue-600/30"
+                >
+                    {loading ? <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div> : <Search className="w-6 h-6" />}
+                </button>
+            </form>
+
+            <div className="mt-28 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                {[
+                    { icon: Globe, title: "Origen Público", desc: "Toda la información proviene de fuentes gubernamentales de libre acceso según Ley 27.275." },
+                    { icon: Fingerprint, title: "Firma Digital", desc: "Cada resolución está anclada a un Hash SHA-256 del documento original en el BORA." },
+                    { icon: ShieldAlert, title: "Auditable", desc: "Cualquier ciudadano puede verificar el contraste técnico mediante el link a la fuente oficial." }
+                ].map((item, i) => (
+                    <div key={i} className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-blue-500/40 transition-all group">
+                        <item.icon className="text-blue-500 mb-6 w-10 h-10 group-hover:scale-110 transition-transform" />
+                        <h3 className="text-white font-black mb-3 text-sm uppercase tracking-wider">{item.title}</h3>
+                        <p className="text-slate-500 text-sm leading-relaxed font-medium">{item.desc}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+
+
+
+    return (
+        <div className="min-h-screen bg-slate-950 font-sans text-slate-200 selection:bg-blue-500/30 overflow-x-hidden">
+            <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(30,58,138,0.15),_transparent_50%)] pointer-events-none"></div>
+            <Nav />
+            <main className="relative z-10">
+                {view === 'home' && <HomeView />}
+                {view === 'resolution' && result && <ResolutionView />}
+                {view === 'roadmap' && <RoadmapView />}
+            </main>
+
+            <footer className="mt-40 border-t border-white/5 py-20 px-12 flex flex-col md:flex-row justify-between items-center gap-10 text-slate-600 text-[10px] uppercase tracking-[0.4em] font-black">
+                <div className="flex items-center gap-3 text-slate-400">
+                    <Globe className="w-4 h-4 text-emerald-500" />
+                    <span>Información de Dominio Público - Ley 27.275</span>
+                </div>
+                <div className="flex gap-16">
+                    <span className="hover:text-white cursor-pointer transition-colors italic uppercase">IAAUTOMATIONS Systems</span>
+                    <span className="hover:text-white cursor-pointer transition-colors uppercase">Seguridad Zero Trust</span>
+                </div>
+            </footer>
+        </div>
+    );
+};
+
+export default App;
