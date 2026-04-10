@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Nav from './components/Nav';
 import HomeView from './components/HomeView';
 import RoadmapView from './components/RoadmapView';
+import RankingView from './components/RankingView';
 import Foot from './components/Foot';
 import ResolutionView from './components/ResolutionViewer';
 import MOCK_RESOLUTION from './datos/mocked_resolution';
@@ -65,6 +66,8 @@ const App = () => {
         {view === 'resolution' && result && <ResolutionView result={result} />}
 
         {view === 'roadmap' && <RoadmapView />}
+
+        {view === 'ranking' && <RankingView />}
       </ContentContainer>
       <Foot />
     </AppContainer>

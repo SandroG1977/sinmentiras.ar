@@ -133,6 +133,12 @@ const Nav = ({ view, setView }) => (
       >
         Roadmap
       </NavButton>
+      <NavButton
+        $active={view === 'ranking'}
+        onClick={() => setView('ranking')}
+      >
+        Ranking
+      </NavButton>
       <InfoBadge>
         <IconWrapper>
           <Globe className="w-3 h-3" />

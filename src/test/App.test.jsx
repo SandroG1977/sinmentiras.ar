@@ -62,4 +62,19 @@ describe('App', () => {
 
     expect(screen.getByText('Plan de Transparencia')).toBeInTheDocument();
   });
+
+  it('navega a ranking desde el nav', () => {
+    const { container } = render(<App />);
+
+    const rankingButton = Array.from(container.querySelectorAll('button')).find(
+      (button) => button.textContent === 'Ranking'
+    );
+
+    expect(rankingButton).not.toBeNull();
+    fireEvent.click(rankingButton);
+
+    expect(
+      screen.getByText('Ranking Nacional de Veracidad')
+    ).toBeInTheDocument();
+  });
 });

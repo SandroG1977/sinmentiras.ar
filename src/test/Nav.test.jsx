@@ -23,6 +23,19 @@ describe('Nav', () => {
     expect(setView).toHaveBeenCalledWith('roadmap');
   });
 
+  it('llama setView con ranking al hacer click en Ranking', () => {
+    const setView = vi.fn();
+    const { container } = render(<Nav view="home" setView={setView} />);
+
+    const rankingButton = Array.from(container.querySelectorAll('button')).find(
+      (button) => button.textContent === 'Ranking'
+    );
+
+    expect(rankingButton).not.toBeNull();
+    fireEvent.click(rankingButton);
+    expect(setView).toHaveBeenCalledWith('ranking');
+  });
+
   it('llama setView con home al hacer click en el logo', () => {
     const setView = vi.fn();
     render(<Nav view="roadmap" setView={setView} />);
