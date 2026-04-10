@@ -65,7 +65,7 @@ const NavMenu = styled.div`
 const NavButton = styled.button`
   background: none;
   border: none;
-  color: ${(props) => (props.active ? 'white' : 'rgb(100, 116, 139)')};
+  color: ${(props) => (props.$active ? 'white' : 'rgb(100, 116, 139)')};
   cursor: pointer;
   transition: color 0.3s;
   font-size: 0.6875rem;
@@ -74,7 +74,7 @@ const NavButton = styled.button`
   letter-spacing: 0.15em;
   padding-bottom: 0.25rem;
   ${(props) =>
-    props.active ? 'border-bottom: 2px solid rgb(59, 130, 246);' : ''}
+    props.$active ? 'border-bottom: 2px solid rgb(59, 130, 246);' : ''}
 
   &:hover {
     color: white;
@@ -124,10 +124,13 @@ const Nav = ({ view, setView }) => (
       </LogoText>
     </LogoContainer>
     <NavMenu>
-      <NavButton active={view === 'home'} onClick={() => setView('home')}>
+      <NavButton $active={view === 'home'} onClick={() => setView('home')}>
         Auditoría
       </NavButton>
-      <NavButton active={view === 'roadmap'} onClick={() => setView('roadmap')}>
+      <NavButton
+        $active={view === 'roadmap'}
+        onClick={() => setView('roadmap')}
+      >
         Roadmap
       </NavButton>
       <InfoBadge>

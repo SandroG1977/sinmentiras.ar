@@ -10,7 +10,7 @@ const CardContainer = styled.div`
   transition: all 0.3s ease;
 
   ${(props) =>
-    props.active
+    props.$active
       ? `
         background: rgba(59, 130, 246, 0.05);
         border-color: rgba(59, 130, 246, 0.3);
@@ -30,7 +30,7 @@ const StepNumber = styled.span`
   font-style: italic;
   letter-spacing: -0.025em;
   color: ${(props) =>
-    props.active ? 'rgb(59, 130, 246)' : 'rgb(71, 85, 105)'};
+    props.$active ? 'rgb(59, 130, 246)' : 'rgb(71, 85, 105)'};
   flex-shrink: 0;
 `;
 
@@ -82,8 +82,8 @@ const PulsingDot = styled.div`
 `;
 
 const RoadmapPhaseCard = ({ step, title, description, active }) => (
-  <CardContainer active={active}>
-    <StepNumber active={active}>{step}</StepNumber>
+  <CardContainer $active={active}>
+    <StepNumber $active={active}>{step}</StepNumber>
     <ContentContainer>
       <Title>{title}</Title>
       <Description>{description}</Description>
