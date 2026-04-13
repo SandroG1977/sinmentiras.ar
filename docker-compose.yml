@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: "../sinmentiras.ar backend"
+      dockerfile: Dockerfile
+    container_name: sinmentiras-backend
+    ports:
+      - "8000:8000"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CACHE_ENABLED: ${CACHE_ENABLED:-true}
+      RAG_ENABLED: ${RAG_ENABLED:-true}
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sinmentiras-frontend
+    ports:
+      - "8001:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
