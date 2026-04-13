@@ -6,7 +6,7 @@ import RoadmapView from './components/RoadmapView';
 import RankingView from './components/RankingView';
 import Foot from './components/Foot';
 import ResolutionView from './components/ResolutionViewer';
-import MOCK_RESOLUTION from './datos/mocked_resolution';
+import { resolveQuery } from './api/resolveQuery';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -14,7 +14,6 @@ const AppContainer = styled.div`
   padding: 0;
   margin: 0;
 `;
-
 const H1 = styled.h1`
   font-size: 2.25rem;
   font-weight: 900;
@@ -36,19 +35,25 @@ const App = () => {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleSearch = (searchText) => {
+  const handleSearch = async (searchText) => {
     const normalizedQuery = searchText.trim();
     if (!normalizedQuery) return;
 
     setQuery(normalizedQuery);
-
     setLoading(true);
-    setTimeout(() => {
-      setResult(MOCK_RESOLUTION);
-      setLoading(false);
+    setError(null);
+
+    try {
+      const data = await resolveQuery(normalizedQuery);
+      setResult(data);
       setView('resolution');
-    }, 1200);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -60,6 +65,7 @@ const App = () => {
             query={query}
             handleSearch={handleSearch}
             isLoading={loading}
+            error={error}
           />
         )}
 
