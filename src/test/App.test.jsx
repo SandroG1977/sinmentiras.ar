@@ -16,7 +16,7 @@ describe('App', () => {
     expect(screen.getByText(/matemática contra/i)).toBeInTheDocument();
   });
 
-  it('hace búsqueda y navega a resolution', () => {
+  it('hace búsqueda y navega a resolution', async () => {
     const { container } = render(<App />);
 
     const input = screen.getByPlaceholderText(/qué dice el dnu/i);
@@ -25,8 +25,9 @@ describe('App', () => {
     fireEvent.change(input, { target: { value: 'decreto 70' } });
     fireEvent.click(submitButton);
 
-    act(() => {
+    await act(async () => {
       vi.advanceTimersByTime(1200);
+      await Promise.resolve();
     });
 
     expect(screen.getByText('INCONSISTENCIA TÉCNICA')).toBeInTheDocument();
