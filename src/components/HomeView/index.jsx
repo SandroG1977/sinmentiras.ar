@@ -162,6 +162,20 @@ const Spinner = styled.div`
   animation: ${spin} 0.9s linear infinite;
 `;
 
+const ErrorMessage = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: -4rem auto 3rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: rgb(252, 165, 165);
+  font-size: 0.875rem;
+  max-width: 48rem;
+`;
+
 const FeaturesGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -232,7 +246,7 @@ const FEATURES = [
   },
 ];
 
-const HomeView = ({ query, handleSearch, isLoading }) => {
+const HomeView = ({ query, handleSearch, isLoading, error }) => {
   const [draftQuery, setDraftQuery] = useState(query);
 
   useEffect(() => {
@@ -273,6 +287,13 @@ const HomeView = ({ query, handleSearch, isLoading }) => {
           {isLoading ? <Spinner /> : <Search />}
         </SearchButton>
       </FormGroup>
+
+      {error && (
+        <ErrorMessage>
+          <ShieldAlert size={16} />
+          {error}
+        </ErrorMessage>
+      )}
 
       <FeaturesGrid>
         {FEATURES.map((feature, i) => {
