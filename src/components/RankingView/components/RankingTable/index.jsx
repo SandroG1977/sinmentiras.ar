@@ -7,12 +7,18 @@ const Wrapper = styled.div`
   background: rgb(15, 23, 42);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1.5rem;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
+
+  @media (max-width: 768px) {
+    border-radius: 1rem;
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
 `;
 

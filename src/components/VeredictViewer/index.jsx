@@ -74,6 +74,11 @@ const BaseCard = styled.div`
 const VerdictCard = styled(BaseCard)`
   border-radius: 40px;
   padding: 3rem;
+
+  @media (max-width: 768px) {
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+  }
 `;
 
 const VerdictHeader = styled.div`
@@ -82,6 +87,12 @@ const VerdictHeader = styled.div`
   align-items: center;
   margin-bottom: 2.5rem;
   gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
 `;
 
 const DataOrigin = styled.div`
@@ -104,6 +115,11 @@ const QueryTitle = styled.h2`
   margin-bottom: 2rem;
   letter-spacing: -0.03em;
   line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.4rem, 8vw, 1.9rem);
+    margin-bottom: 1rem;
+  }
 `;
 
 const SummaryBox = styled.div`
@@ -112,6 +128,13 @@ const SummaryBox = styled.div`
   border-radius: 32px;
   border-left: 8px solid #2563eb;
   margin-bottom: 2.5rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    border-radius: 1rem;
+    border-left-width: 4px;
+    margin-bottom: 1.25rem;
+  }
 `;
 
 const SummaryText = styled.p`
@@ -120,6 +143,11 @@ const SummaryText = styled.p`
   font-weight: 500;
   line-height: 1.75;
   font-style: italic;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
 `;
 
 const NewsBlock = styled.div`
@@ -146,6 +174,11 @@ const NewsRow = styled.div`
   background: rgba(0, 0, 0, 0.4);
   border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    align-items: flex-start;
+  }
 `;
 
 const NewsSource = styled.p`
@@ -184,6 +217,13 @@ const IntegrityCard = styled(BaseCard)`
   display: flex;
   align-items: center;
   gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    border-radius: 1rem;
+    padding: 1rem;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 `;
 
 const IntegrityIconWrap = styled.div`

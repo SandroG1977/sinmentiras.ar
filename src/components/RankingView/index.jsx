@@ -6,6 +6,11 @@ const Container = styled.div`
   max-width: 80rem;
   margin: 4rem auto;
   padding: 0 1.5rem 6rem;
+
+  @media (max-width: 768px) {
+    margin: 2rem auto;
+    padding: 0 1rem 3rem;
+  }
 `;
 
 const Header = styled.div`
@@ -17,6 +22,7 @@ const Header = styled.div`
 
   @media (max-width: 768px) {
     flex-direction: column;
+    margin-bottom: 1.5rem;
   }
 `;
 
@@ -26,6 +32,10 @@ const Title = styled.h2`
   color: white;
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
+
+  @media (max-width: 768px) {
+    font-size: clamp(1.4rem, 8vw, 1.9rem);
+  }
 `;
 
 const Subtitle = styled.p`

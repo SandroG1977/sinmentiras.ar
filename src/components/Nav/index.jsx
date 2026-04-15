@@ -12,6 +12,10 @@ const NavBar = styled.nav`
   position: sticky;
   top: 0;
   z-index: 50;
+
+  @media (max-width: 768px) {
+    padding: 0.85rem 1rem;
+  }
 `;
 
 const LogoContainer = styled.div`
@@ -45,6 +49,10 @@ const LogoText = styled.span`
 
   span {
     color: rgb(59, 130, 246);
+  }
+
+  @media (max-width: 768px) {
+    font-size: clamp(0.95rem, 5vw, 1.1rem);
   }
 `;
 

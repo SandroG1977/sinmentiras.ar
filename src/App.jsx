@@ -28,6 +28,10 @@ const H1 = styled.h1`
 
 const ContentContainer = styled.div`
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 const App = () => {

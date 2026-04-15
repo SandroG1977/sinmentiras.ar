@@ -14,6 +14,11 @@ const Container = styled.div`
   margin: 6rem auto;
   padding: 0 1.5rem;
   text-align: center;
+
+  @media (max-width: 768px) {
+    margin: 2.75rem auto;
+    padding: 0 1rem;
+  }
 `;
 
 const Badge = styled.div`
@@ -43,6 +48,12 @@ const Title = styled.h1`
   br {
     display: block;
   }
+
+  @media (max-width: 768px) {
+    font-size: clamp(2rem, 11vw, 2.9rem);
+    margin-bottom: 1.25rem;
+    line-height: 1.05;
+  }
 `;
 
 const Highlight = styled.span`
@@ -68,6 +79,11 @@ const Subtitle = styled.p`
     text-decoration: underline;
     text-decoration-color: rgb(59, 130, 246);
   }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
 `;
 
 const FormGroup = styled.form`
@@ -75,6 +91,10 @@ const FormGroup = styled.form`
   max-width: 48rem;
   margin: 0 auto;
   margin-bottom: 7rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 3rem;
+  }
 `;
 
 const FormGlow = styled.div`
@@ -92,7 +112,7 @@ const FormGlow = styled.div`
 
 const SearchInput = styled.input`
   position: relative;
-  width: 90%;
+  width: 100%;
   background: rgb(15, 23, 42);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1.5rem;
@@ -111,12 +131,20 @@ const SearchInput = styled.input`
     outline: none;
     box-shadow: 0 0 0 2px rgb(59, 130, 246);
   }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 1rem 1rem;
+    padding-right: 4.25rem;
+    border-radius: 1rem;
+  }
 `;
 
 const SearchButton = styled.button`
   position: absolute;
-  right: 0.1rem;
-  top: 1rem;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
   background: rgb(37, 99, 235);
   border: none;
   color: white;
@@ -141,6 +169,16 @@ const SearchButton = styled.button`
   svg {
     width: 1.5rem;
     height: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.8rem;
+    border-radius: 0.8rem;
+
+    svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
   }
 `;
 
@@ -185,6 +223,10 @@ const FeaturesGrid = styled.div`
   @media (min-width: 768px) {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  @media (max-width: 767px) {
+    gap: 1rem;
+  }
 `;
 
 const FeatureCard = styled.div`
@@ -225,6 +267,11 @@ const FeatureCard = styled.div`
 
   &:hover svg {
     transform: scale(1.1);
+  }
+
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
   }
 `;
 

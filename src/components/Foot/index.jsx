@@ -19,6 +19,14 @@ const Footer = styled.footer`
   @media (min-width: 768px) {
     flex-direction: row;
   }
+
+  @media (max-width: 767px) {
+    margin-top: 4rem;
+    gap: 1rem;
+    padding: 2rem 1rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+  }
 `;
 
 const Left = styled.div`
@@ -31,6 +39,13 @@ const Left = styled.div`
 const Right = styled.div`
   display: flex;
   gap: 4rem;
+
+  @media (max-width: 767px) {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
 `;
 
 const FooterText = styled.span`

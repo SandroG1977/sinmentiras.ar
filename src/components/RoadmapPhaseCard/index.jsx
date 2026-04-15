@@ -22,6 +22,13 @@ const CardContainer = styled.div`
         opacity: 0.5;
         filter: grayscale(100%);
     `}
+
+  @media (max-width: 768px) {
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    flex-direction: column;
+  }
 `;
 
 const StepNumber = styled.span`
@@ -32,6 +39,10 @@ const StepNumber = styled.span`
   color: ${(props) =>
     props.$active ? 'rgb(59, 130, 246)' : 'rgb(71, 85, 105)'};
   flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 const ContentContainer = styled.div`
@@ -44,6 +55,10 @@ const Title = styled.h3`
   color: white;
   margin-bottom: 0.5rem;
   letter-spacing: -0.025em;
+
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
 `;
 
 const Description = styled.p`
