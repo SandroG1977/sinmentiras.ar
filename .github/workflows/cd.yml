@@ -4,16 +4,9 @@ on:
   workflow_run:
     workflows: ['CI']
     types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
-      target:
-        description: 'Deployment target'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - staging
-          - production
       ref:
         description: 'Git ref to deploy (branch, tag, or SHA)'
         required: true
@@ -21,133 +14,40 @@ on:
         type: string
 
 concurrency:
-  group: cd-${{ github.ref }}
+  group: cd-production
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  deploy-staging:
-    name: Deploy Staging
+  deploy:
+    name: Deploy to VPS
     if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main'
-    runs-on: ubuntu-latest
-    environment: staging
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Start SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Configure known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-
-      - name: Deploy via rsync
-        run: |
-          rsync -avz --delete dist/ \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}"
-
-  deploy-production:
-    name: Deploy Production
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'production'
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main') ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.ref }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
 
-      - name: Configure known_hosts
+      - name: Add VPS host key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
+          ssh-keyscan -p "${{ secrets.VPS_SSH_PORT }}" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy via rsync
+      - name: Deploy via Docker Compose
         run: |
-          rsync -avz --delete dist/ \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}"
-
-  deploy-staging-manual:
-    name: Deploy Staging (Manual)
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'staging'
-    runs-on: ubuntu-latest
-    environment: staging
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.ref }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Start SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Configure known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-
-      - name: Deploy via rsync
-        run: |
-          rsync -avz --delete dist/ \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}"
+          ssh -p "${{ secrets.VPS_SSH_PORT }}" \
+              "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_HOST }}" \
+              "set -e && \
+               cd '${{ secrets.VPS_BACKEND_DIR }}' && git pull origin main && \
+               cd '${{ secrets.VPS_FRONTEND_DIR }}' && git pull origin main && \
+               BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' docker compose up -d --build && \
+               docker image prune -f"

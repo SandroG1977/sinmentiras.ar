@@ -1,15 +1,19 @@
 services:
   backend:
     build:
-      context: "../sinmentiras.ar backend"
+      context: ${BACKEND_DIR:-../sinmentiras.ar backend}
       dockerfile: Dockerfile
     container_name: sinmentiras-backend
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
+    env_file:
+      - ${BACKEND_ENV_FILE:-../sinmentiras.ar backend/.env}
     environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       CACHE_ENABLED: ${CACHE_ENABLED:-true}
       RAG_ENABLED: ${RAG_ENABLED:-true}
+    networks:
+      - default
+      - proxy
     restart: unless-stopped
 
   frontend:
@@ -18,7 +22,15 @@ services:
       dockerfile: Dockerfile
     container_name: sinmentiras-frontend
     ports:
-      - "8001:80"
+      - "${FRONTEND_PORT:-8001}:80"
     depends_on:
       - backend
+    networks:
+      - default
+      - proxy
     restart: unless-stopped
+
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-traefik_proxy}
