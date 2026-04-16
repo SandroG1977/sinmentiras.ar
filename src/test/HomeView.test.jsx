@@ -50,4 +50,17 @@ describe('HomeView', () => {
     expect(screen.getByText('Firma Digital')).toBeInTheDocument();
     expect(screen.getByText('Auditable')).toBeInTheDocument();
   });
+
+  it('muestra error cuando error prop está definido', () => {
+    render(
+      <HomeView
+        query=""
+        handleSearch={vi.fn()}
+        isLoading={false}
+        error="Network error occurred"
+      />
+    );
+
+    expect(screen.getByText('Network error occurred')).toBeInTheDocument();
+  });
 });
