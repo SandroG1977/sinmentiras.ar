@@ -57,7 +57,7 @@ jobs:
               "set -e && \
                cd '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && git pull origin main && \
                cd '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && git pull origin main && \
-               BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' docker compose up -d --build && \
+               APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' docker compose up -d --build && \
                docker image prune -f"
 
   deploy-production:
@@ -88,5 +88,5 @@ jobs:
               "set -e && \
                cd '${{ secrets.VPS_BACKEND_DIR }}' && git pull origin PRD && \
                cd '${{ secrets.VPS_FRONTEND_DIR }}' && git pull origin PRD && \
-               BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' docker compose up -d --build && \
+               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' docker compose up -d --build && \
                docker image prune -f"
