@@ -1,27 +1,21 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import VeredictTag from '../components/VeredictViewer/VeredictTag';
 
 describe('VeredictTag - Coverage for all verdict types', () => {
   it('renderiza tag con color verde para VERDADERO', () => {
-    const { container } = render(<VeredictTag result="VERDADERO" />);
-    const tag = container.querySelector('span');
-    expect(tag).toHaveTextContent('VERDADERO');
-    expect(tag).toBeInTheDocument();
+    render(<VeredictTag result="VERDADERO" />);
+    expect(screen.getByText('VERDADERO')).toBeInTheDocument();
   });
 
   it('renderiza tag con color rojo para FALSO', () => {
-    const { container } = render(<VeredictTag result="FALSO" />);
-    const tag = container.querySelector('span');
-    expect(tag).toHaveTextContent('FALSO');
-    expect(tag).toBeInTheDocument();
+    render(<VeredictTag result="FALSO" />);
+    expect(screen.getByText('FALSO')).toBeInTheDocument();
   });
 
   it('renderiza tag con color naranja para el caso default', () => {
-    const { container } = render(<VeredictTag result="INDETERMINADO" />);
-    const tag = container.querySelector('span');
-    expect(tag).toHaveTextContent('INDETERMINADO');
-    expect(tag).toBeInTheDocument();
+    render(<VeredictTag result="INDETERMINADO" />);
+    expect(screen.getByText('INDETERMINADO')).toBeInTheDocument();
   });
 
   it('no renderiza nada cuando result es null', () => {
