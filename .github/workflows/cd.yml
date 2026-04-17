@@ -82,6 +82,14 @@ jobs:
             exit 1
           fi
 
+      - name: Validate remote directories exist (staging)
+        run: |
+          ssh -p "${{ secrets.VPS_SSH_PORT }}" \
+              "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_HOST }}" \
+              "set -e && \
+               test -d '${{ secrets.VPS_BACKEND_DIR_STAGING }}' || (echo 'Missing remote dir for VPS_BACKEND_DIR_STAGING' && exit 1) && \
+               test -d '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' || (echo 'Missing remote dir for VPS_FRONTEND_DIR_STAGING' && exit 1)"
+
       - name: Deploy via Docker Compose
         run: |
           ssh -p "${{ secrets.VPS_SSH_PORT }}" \
@@ -146,6 +154,14 @@ jobs:
             echo "Failed to fetch host key. Check VPS_HOST/VPS_SSH_PORT and network reachability."
             exit 1
           fi
+
+      - name: Validate remote directories exist (production)
+        run: |
+          ssh -p "${{ secrets.VPS_SSH_PORT }}" \
+              "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_HOST }}" \
+              "set -e && \
+               test -d '${{ secrets.VPS_BACKEND_DIR }}' || (echo 'Missing remote dir for VPS_BACKEND_DIR' && exit 1) && \
+               test -d '${{ secrets.VPS_FRONTEND_DIR }}' || (echo 'Missing remote dir for VPS_FRONTEND_DIR' && exit 1)"
 
       - name: Deploy via Docker Compose
         run: |
