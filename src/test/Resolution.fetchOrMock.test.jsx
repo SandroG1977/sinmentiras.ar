@@ -24,7 +24,7 @@ describe('Resolution constructor', () => {
     expect(r.highlights).toEqual([]);
   });
 
-  it('rechaza highlights no-array y usa array vacío', () => {
+  it('normaliza highlights no-array a array vacío', () => {
     const r = new Resolution({ highlights: 'no-array' });
     expect(r.highlights).toEqual([]);
   });
