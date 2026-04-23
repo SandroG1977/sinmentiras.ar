@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import VeredictViewer from '../components/VeredictViewer';
 import MOCK_RESOLUTION from '../datos/mocked_resolution';
@@ -12,10 +12,16 @@ describe('VeredictViewer', () => {
   it('renderiza veredicto, consulta y resumen', () => {
     render(<VeredictViewer result={MOCK_RESOLUTION} />);
 
-    expect(screen.getByText(MOCK_RESOLUTION.verdict)).toBeInTheDocument();
-    expect(screen.getByText(MOCK_RESOLUTION.query)).toBeInTheDocument();
+    const visibleCard = screen.getByTestId('shareable-verdict-card');
+
     expect(
-      screen.getByText(new RegExp(MOCK_RESOLUTION.summary_ia, 'i'))
+      within(visibleCard).getByText(MOCK_RESOLUTION.verdict)
+    ).toBeInTheDocument();
+    expect(
+      within(visibleCard).getByText(MOCK_RESOLUTION.query)
+    ).toBeInTheDocument();
+    expect(
+      within(visibleCard).getByText(new RegExp(MOCK_RESOLUTION.summary_ia, 'i'))
     ).toBeInTheDocument();
   });
 
@@ -66,5 +72,25 @@ describe('VeredictViewer', () => {
       screen.getByText('Contraste de Medios Auditados')
     ).toBeInTheDocument();
     expect(screen.queryByText('C5N')).not.toBeInTheDocument();
+  });
+
+  it('renderiza acciones sociales del resultado', () => {
+    render(<VeredictViewer result={MOCK_RESOLUTION} />);
+
+    expect(
+      screen.getByRole('button', { name: /descargar placa para instagram/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /compartir en whatsapp/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /compartir en x/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /compartir en telegram/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /copiar resultado/i })
+    ).toBeInTheDocument();
   });
 });

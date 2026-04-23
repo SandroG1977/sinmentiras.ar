@@ -66,7 +66,8 @@ const RankingView = () => (
       <div>
         <Title>Ranking Nacional de Veracidad</Title>
         <Subtitle>
-          Puntaje de integridad basado en datos históricos y réplicas aceptadas.
+          Índice de Consistencia Normativa (ICN) basado en datos históricos y
+          réplicas aceptadas.
         </Subtitle>
       </div>
       <div>
