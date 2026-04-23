@@ -1,6 +1,35 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Resolution } from '../datos/mocked_resolution';
 
+describe('Resolution constructor', () => {
+  it('aplica valores por defecto cuando se instancia con objeto vacío', () => {
+    const r = new Resolution({});
+    expect(r.id).toBe('');
+    expect(r.query).toBe('');
+    expect(r.verdict).toBe('SIN DATOS SUFICIENTES');
+    expect(r.summary_ia).toBe('');
+    expect(r.hash).toBe('');
+    expect(r.source_law).toBe('');
+    expect(r.source_url).toBe('');
+    expect(r.original_text).toBe('');
+    expect(r.highlights).toEqual([]);
+    expect(r.news_context).toEqual([]);
+    expect(r.chunks_used).toEqual([]);
+    expect(r.used_model).toBe('');
+  });
+
+  it('fromBackend con null retorna instancia con valores por defecto', () => {
+    const r = Resolution.fromBackend(null);
+    expect(r.verdict).toBe('SIN DATOS SUFICIENTES');
+    expect(r.highlights).toEqual([]);
+  });
+
+  it('rechaza highlights no-array y usa array vacío', () => {
+    const r = new Resolution({ highlights: 'no-array' });
+    expect(r.highlights).toEqual([]);
+  });
+});
+
 describe('Resolution.fetchOrMock', () => {
   it('usa backend cuando responde ok', async () => {
     const backendPayload = {
@@ -64,6 +93,42 @@ describe('Resolution.fetchOrMock', () => {
     expect(fetchMock).toHaveBeenCalledOnce();
     expect(result.verdict).toBe('INCONSISTENCIA TÉCNICA');
     expect(result.id).toBe('AUD-2024-882');
+
+    vi.unstubAllGlobals();
+  });
+
+  it('lanza error cuando backend devuelve respuesta no-ok', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      text: async () => 'Service Unavailable',
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      Resolution.fetchOrMock('consulta error', 5, {
+        forceNetwork: true,
+        useMockFallback: false,
+      })
+    ).rejects.toThrow('Backend error 503: Service Unavailable');
+
+    vi.unstubAllGlobals();
+  });
+
+  it('lanza error de red cuando useMockFallback es false', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValue(new Error('network unavailable'));
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      Resolution.fetchOrMock('consulta sin fallback', 5, {
+        forceNetwork: true,
+        useMockFallback: false,
+      })
+    ).rejects.toThrow('network unavailable');
 
     vi.unstubAllGlobals();
   });

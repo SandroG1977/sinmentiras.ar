@@ -253,6 +253,31 @@ describe('SocialShare', () => {
     ).toBeInTheDocument();
   });
 
+  it('usa nombre de archivo fallback cuando result.id no está presente', async () => {
+    toPng.mockClear();
+    toPng.mockResolvedValue('data:image/png;base64,test');
+
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+
+    const resultWithoutId = { ...MOCK_RESOLUTION, id: '' };
+    const captureNode = document.createElement('div');
+
+    render(
+      <SocialShare
+        result={resultWithoutId}
+        captureRef={{ current: captureNode }}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /descargar placa para instagram/i })
+    );
+
+    await waitFor(() =>
+      expect(screen.getAllByText(/placa descargada/i).length).toBeGreaterThan(0)
+    );
+  });
+
   it('muestra error si falla toPng al descargar', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     toPng.mockRejectedValue(new Error('png failed'));
