@@ -16,6 +16,14 @@ afterEach(() => {
 });
 
 describe('SocialShare', () => {
+  it('no renderiza nada cuando result es null', () => {
+    const { container } = render(
+      <SocialShare result={null} captureRef={{ current: null }} />
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
+
   it('renderiza links directos a WhatsApp, X y Telegram', () => {
     render(
       <SocialShare
@@ -61,6 +69,55 @@ describe('SocialShare', () => {
     expect(screen.getByText(/copiado para compartir/i)).toBeInTheDocument();
   });
 
+  it('usa fallback con execCommand cuando navigator.clipboard no existe', async () => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: undefined,
+    });
+
+    const execCommandMock = vi.fn(() => true);
+    Object.defineProperty(document, 'execCommand', {
+      configurable: true,
+      value: execCommandMock,
+    });
+
+    render(
+      <SocialShare
+        result={MOCK_RESOLUTION}
+        captureRef={{ current: document.createElement('div') }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /copiar resultado/i }));
+
+    await waitFor(() => expect(execCommandMock).toHaveBeenCalledWith('copy'));
+    expect(screen.getByText(/copiado para compartir/i)).toBeInTheDocument();
+  });
+
+  it('muestra feedback de error cuando falla la copia', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const writeTextMock = vi.fn().mockRejectedValue(new Error('copy failed'));
+
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: writeTextMock },
+    });
+
+    render(
+      <SocialShare
+        result={MOCK_RESOLUTION}
+        captureRef={{ current: document.createElement('div') }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /copiar resultado/i }));
+
+    await waitFor(() =>
+      expect(screen.getByText(/no se pudo copiar/i)).toBeInTheDocument()
+    );
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
   it('renderiza la opcion mas cuando navigator.share esta disponible', () => {
     Object.defineProperty(navigator, 'share', {
       configurable: true,
@@ -77,6 +134,79 @@ describe('SocialShare', () => {
     expect(
       screen.getByRole('button', { name: /más opciones para compartir/i })
     ).toBeInTheDocument();
+  });
+
+  it('comparte con navigator.share y muestra feedback de exito', async () => {
+    const shareMock = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: shareMock,
+    });
+
+    render(
+      <SocialShare
+        result={MOCK_RESOLUTION}
+        captureRef={{ current: document.createElement('div') }}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /más opciones para compartir/i })
+    );
+
+    await waitFor(() => expect(shareMock).toHaveBeenCalledTimes(1));
+    expect(screen.getByText(/resultado compartido/i)).toBeInTheDocument();
+  });
+
+  it('no muestra error cuando navigator.share se cancela con AbortError', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const shareMock = vi.fn().mockRejectedValue({ name: 'AbortError' });
+
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: shareMock,
+    });
+
+    render(
+      <SocialShare
+        result={MOCK_RESOLUTION}
+        captureRef={{ current: document.createElement('div') }}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /más opciones para compartir/i })
+    );
+
+    await waitFor(() => expect(shareMock).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText(/no se pudo compartir/i)).not.toBeInTheDocument();
+    expect(errorSpy).not.toHaveBeenCalled();
+  });
+
+  it('muestra feedback de error cuando navigator.share falla', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const shareMock = vi.fn().mockRejectedValue(new Error('share failed'));
+
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: shareMock,
+    });
+
+    render(
+      <SocialShare
+        result={MOCK_RESOLUTION}
+        captureRef={{ current: document.createElement('div') }}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /más opciones para compartir/i })
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText(/no se pudo compartir/i)).toBeInTheDocument()
+    );
+    expect(errorSpy).toHaveBeenCalled();
   });
 
   it('descarga una placa png del resultado', async () => {
@@ -109,5 +239,40 @@ describe('SocialShare', () => {
     await waitFor(() =>
       expect(screen.getAllByText(/placa descargada/i).length).toBeGreaterThan(0)
     );
+  });
+
+  it('muestra error si se intenta descargar sin captureRef', () => {
+    render(<SocialShare result={MOCK_RESOLUTION} captureRef={undefined} />);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /descargar placa para instagram/i })
+    );
+
+    expect(
+      screen.getByText(/no se pudo generar la placa/i)
+    ).toBeInTheDocument();
+  });
+
+  it('muestra error si falla toPng al descargar', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    toPng.mockRejectedValue(new Error('png failed'));
+
+    render(
+      <SocialShare
+        result={MOCK_RESOLUTION}
+        captureRef={{ current: document.createElement('div') }}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /descargar placa para instagram/i })
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/no se pudo generar la placa/i)
+      ).toBeInTheDocument()
+    );
+    expect(errorSpy).toHaveBeenCalled();
   });
 });
