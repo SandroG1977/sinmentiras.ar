@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ['CI']
     types: [completed]
-    branches: [main]
+    branches: [main, PRD]
   workflow_dispatch:
     inputs:
       ref:
@@ -101,8 +101,6 @@ jobs:
                (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
                echo 'Frontend deployed commit:' && \
                git rev-parse HEAD && \
-               cd '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && git pull origin main && \
-               cd '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && git pull origin main && \
                APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose up -d --build && \
                docker image prune -f"
 
@@ -111,7 +109,7 @@ jobs:
     if: >-
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main') ||
+       github.event.workflow_run.head_branch == 'PRD') ||
       (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
     runs-on: ubuntu-latest
     environment: production
@@ -176,7 +174,15 @@ jobs:
               "set -e && \
                git config --global --add safe.directory '${{ secrets.VPS_BACKEND_DIR }}' && \
                git config --global --add safe.directory '${{ secrets.VPS_FRONTEND_DIR }}' && \
-               cd '${{ secrets.VPS_BACKEND_DIR }}' && git pull origin main && \
-               cd '${{ secrets.VPS_FRONTEND_DIR }}' && git pull origin main && \
+               cd '${{ secrets.VPS_BACKEND_DIR }}' && \
+               git fetch origin --tags --prune && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               echo 'Backend deployed commit:' && \
+               git rev-parse HEAD && \
+               cd '${{ secrets.VPS_FRONTEND_DIR }}' && \
+               git fetch origin --tags --prune && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               echo 'Frontend deployed commit:' && \
+               git rev-parse HEAD && \
                APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose up -d --build && \
                docker image prune -f"
