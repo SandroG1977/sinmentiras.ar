@@ -57,7 +57,11 @@ describe('VeredictViewer', () => {
   it('renderiza el origen de datos oficial', () => {
     render(<VeredictViewer result={MOCK_RESOLUTION} />);
 
-    expect(screen.getByText('DATA ORIGIN: BORA.GOB.AR')).toBeInTheDocument();
+    const visibleCard = screen.getByTestId('shareable-verdict-card');
+
+    expect(
+      within(visibleCard).getByText('DATA ORIGIN: INFOLEG.GOB.AR')
+    ).toBeInTheDocument();
   });
 
   it('renderiza correctamente cuando news_context no existe', () => {

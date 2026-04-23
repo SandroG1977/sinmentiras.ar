@@ -10,7 +10,9 @@ describe('RankingView', () => {
       screen.getByText('Ranking Nacional de Veracidad')
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/puntaje de integridad basado en datos históricos/i)
+      screen.getByText(
+        /índice de consistencia normativa \(icn\) basado en datos históricos/i
+      )
     ).toBeInTheDocument();
   });
 

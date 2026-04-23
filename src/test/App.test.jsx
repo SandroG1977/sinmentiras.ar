@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
 
@@ -30,7 +30,11 @@ describe('App', () => {
       await Promise.resolve();
     });
 
-    expect(screen.getByText('INCONSISTENCIA TÉCNICA')).toBeInTheDocument();
+    const visibleCard = screen.getByTestId('shareable-verdict-card');
+
+    expect(
+      within(visibleCard).getByText('INCONSISTENCIA TÉCNICA')
+    ).toBeInTheDocument();
     expect(screen.getByText('Documento Fuente')).toBeInTheDocument();
   });
 
