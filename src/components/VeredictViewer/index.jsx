@@ -48,7 +48,7 @@ const VeredictViewer = ({ result }) => {
             <VeredictTag result={result.verdict} />
             <DataOrigin>
               <Globe size={14} />
-              <DataOriginText>DATA ORIGIN: BORA.GOB.AR</DataOriginText>
+              <DataOriginText>DATA ORIGIN: INFOLEG.GOB.AR</DataOriginText>
             </DataOrigin>
           </VerdictHeader>
 
