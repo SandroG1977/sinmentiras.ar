@@ -38,6 +38,8 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
     runs-on: ubuntu-latest
     environment: staging
+    env:
+      DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_sha }}
 
     steps:
       - name: Validate SSH key secret is present
@@ -97,8 +99,16 @@ jobs:
               "set -e && \
                git config --global --add safe.directory '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && \
                git config --global --add safe.directory '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && \
-               cd '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && git pull origin main && \
-               cd '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && git pull origin main && \
+               cd '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && \
+               git fetch origin --tags --prune && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               echo 'Backend deployed commit:' && \
+               git rev-parse HEAD && \
+               cd '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && \
+               git fetch origin --tags --prune && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               echo 'Frontend deployed commit:' && \
+               git rev-parse HEAD && \
                APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose up -d --build && \
                docker image prune -f"
 
@@ -111,6 +121,8 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
     runs-on: ubuntu-latest
     environment: production
+    env:
+      DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_sha }}
 
     steps:
       - name: Validate SSH key secret is present
@@ -170,7 +182,15 @@ jobs:
               "set -e && \
                git config --global --add safe.directory '${{ secrets.VPS_BACKEND_DIR }}' && \
                git config --global --add safe.directory '${{ secrets.VPS_FRONTEND_DIR }}' && \
-               cd '${{ secrets.VPS_BACKEND_DIR }}' && git pull origin main && \
-               cd '${{ secrets.VPS_FRONTEND_DIR }}' && git pull origin main && \
+               cd '${{ secrets.VPS_BACKEND_DIR }}' && \
+               git fetch origin --tags --prune && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               echo 'Backend deployed commit:' && \
+               git rev-parse HEAD && \
+               cd '${{ secrets.VPS_FRONTEND_DIR }}' && \
+               git fetch origin --tags --prune && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               echo 'Frontend deployed commit:' && \
+               git rev-parse HEAD && \
                APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose up -d --build && \
                docker image prune -f"
