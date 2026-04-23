@@ -41,6 +41,7 @@ jobs:
     environment: staging
     env:
       DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_sha }}
+      DEPLOY_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_branch }}
 
     steps:
       - name: Validate SSH key secret is present
@@ -93,13 +94,13 @@ jobs:
                git config --global --add safe.directory '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && \
                git config --global --add safe.directory '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && \
                cd '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && \
-               git fetch origin --tags --prune && \
-               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}') && \
                echo 'Backend deployed commit:' && \
                git rev-parse HEAD && \
                cd '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && \
-               git fetch origin --tags --prune && \
-               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}') && \
                echo 'Frontend deployed commit:' && \
                git rev-parse HEAD && \
                APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose up -d --build && \
@@ -117,6 +118,7 @@ jobs:
     environment: production
     env:
       DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_sha }}
+      DEPLOY_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_branch }}
 
     steps:
       - name: Validate SSH key secret is present
@@ -177,13 +179,13 @@ jobs:
                git config --global --add safe.directory '${{ secrets.VPS_BACKEND_DIR }}' && \
                git config --global --add safe.directory '${{ secrets.VPS_FRONTEND_DIR }}' && \
                cd '${{ secrets.VPS_BACKEND_DIR }}' && \
-               git fetch origin --tags --prune && \
-               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}') && \
                echo 'Backend deployed commit:' && \
                git rev-parse HEAD && \
                cd '${{ secrets.VPS_FRONTEND_DIR }}' && \
-               git fetch origin --tags --prune && \
-               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_REF }}') && \
+               git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
+               (git checkout --force '${{ env.DEPLOY_REF }}' || git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}') && \
                echo 'Frontend deployed commit:' && \
                git rev-parse HEAD && \
                APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose up -d --build && \
