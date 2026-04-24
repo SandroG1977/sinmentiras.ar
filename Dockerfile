@@ -5,6 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+ARG CACHE_BUST=unknown
 COPY . .
 RUN npm run build
 
