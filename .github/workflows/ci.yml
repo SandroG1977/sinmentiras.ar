@@ -1,10 +1,8 @@
-name: CI/CD
+name: CI
 
 on:
   push:
     branches: [main, PRD]
-  pull_request:
-    branches: [PRD]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -49,9 +47,9 @@ jobs:
           if-no-files-found: ignore
 
   deploy-staging:
-    name: Deploy to VPS (staging)
+    name: Deploy frontend to DEV
     needs: quality
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: staging
     env:
@@ -100,39 +98,29 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy via Docker Compose
+      - name: Deploy frontend via Docker Compose
         run: |
           ssh -p "${{ secrets.VPS_SSH_PORT }}" \
               "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_HOST }}" \
               "set -e && \
-               git config --global --add safe.directory '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && \
                git config --global --add safe.directory '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && \
-               cd '${{ secrets.VPS_BACKEND_DIR_STAGING }}' && \
-               git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
-               git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}' && \
-               echo 'Backend deployed commit:' && \
-               git rev-parse HEAD && \
                cd '${{ secrets.VPS_FRONTEND_DIR_STAGING }}' && \
                git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
                git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}' && \
                echo 'Frontend deployed commit:' && \
                git rev-parse HEAD && \
-               APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose build --build-arg CACHE_BUST=${{ github.sha }} && \
-               APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose up -d && \
+               APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose build --build-arg CACHE_BUST=${{ github.sha }} frontend && \
+               APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose up -d --no-deps frontend && \
                docker image prune -f"
 
   deploy-production:
-    name: Deploy to VPS (production)
+    name: Deploy frontend to PRD
     needs: quality
-    if: >-
-      (github.event_name == 'pull_request' &&
-       github.base_ref == 'PRD' &&
-       github.head_ref == 'main') ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/PRD')
+    if: github.ref == 'refs/heads/PRD'
     runs-on: ubuntu-latest
     environment: production
     env:
-      DEPLOY_BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || 'PRD' }}
+      DEPLOY_BRANCH: PRD
 
     steps:
       - name: Validate SSH key secret is present
@@ -177,31 +165,18 @@ jobs:
             exit 1
           fi
 
-      - name: Validate remote directories exist (production)
+      - name: Deploy frontend via Docker Compose
         run: |
           ssh -p "${{ secrets.VPS_SSH_PORT }}" \
               "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_HOST }}" \
               "set -e && \
-               test -d '${{ secrets.VPS_BACKEND_DIR }}' || (echo 'Missing remote dir for VPS_BACKEND_DIR' && exit 1) && \
-               test -d '${{ secrets.VPS_FRONTEND_DIR }}' || (echo 'Missing remote dir for VPS_FRONTEND_DIR' && exit 1)"
-
-      - name: Deploy via Docker Compose
-        run: |
-          ssh -p "${{ secrets.VPS_SSH_PORT }}" \
-              "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_HOST }}" \
-              "set -e && \
-               git config --global --add safe.directory '${{ secrets.VPS_BACKEND_DIR }}' && \
                git config --global --add safe.directory '${{ secrets.VPS_FRONTEND_DIR }}' && \
-               cd '${{ secrets.VPS_BACKEND_DIR }}' && \
-               git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
-               git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}' && \
-               echo 'Backend deployed commit:' && \
-               git rev-parse HEAD && \
                cd '${{ secrets.VPS_FRONTEND_DIR }}' && \
                git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
                git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}' && \
                echo 'Frontend deployed commit:' && \
                git rev-parse HEAD && \
-               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose build --build-arg CACHE_BUST=${{ github.sha }} && \
-               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose up -d && \
+               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose build --build-arg CACHE_BUST=${{ github.sha }} frontend && \
+               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose up -d --no-deps frontend && \
                docker image prune -f"
+
