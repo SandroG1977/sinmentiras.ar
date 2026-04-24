@@ -117,7 +117,7 @@ jobs:
                git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}' && \
                echo 'Frontend deployed commit:' && \
                git rev-parse HEAD && \
-               APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose build --build-arg CACHE_BUST=$(git rev-parse HEAD) && \
+               APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose build --build-arg CACHE_BUST=${{ github.sha }} && \
                APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose up -d && \
                docker image prune -f"
 
@@ -202,6 +202,6 @@ jobs:
                git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}' && \
                echo 'Frontend deployed commit:' && \
                git rev-parse HEAD && \
-               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose build --build-arg CACHE_BUST=$(git rev-parse HEAD) && \
+               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose build --build-arg CACHE_BUST=${{ github.sha }} && \
                APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose up -d && \
                docker image prune -f"
