@@ -40,8 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     env:
-      DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_sha }}
-      DEPLOY_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_branch }}
+      DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'main' }}
+      DEPLOY_BRANCH: main
 
     steps:
       - name: Validate SSH key secret is present
@@ -117,8 +117,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_sha }}
-      DEPLOY_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.workflow_run.head_branch }}
+      DEPLOY_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || 'PRD' }}
+      DEPLOY_BRANCH: PRD
 
     steps:
       - name: Validate SSH key secret is present
