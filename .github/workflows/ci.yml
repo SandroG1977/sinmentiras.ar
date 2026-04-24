@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, PRD]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -49,6 +49,7 @@ jobs:
   deploy-staging:
     name: Deploy frontend to DEV
     needs: quality
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: staging
     env:
@@ -110,5 +111,72 @@ jobs:
                git rev-parse HEAD && \
                APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose build --build-arg CACHE_BUST=${{ github.sha }} frontend && \
                APP_INSTANCE='stg' COMPOSE_PROJECT_NAME='sinmentiras-staging' FRONTEND_BIND_IP='127.0.0.1' FRONTEND_PORT='18001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR_STAGING }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR_STAGING }}/.env' docker compose up -d --no-deps frontend && \
+               docker image prune -f"
+
+  deploy-production:
+    name: Deploy frontend to PRD
+    needs: quality
+    if: github.ref == 'refs/heads/PRD'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_BRANCH: PRD
+
+    steps:
+      - name: Validate SSH key secret is present
+        run: |
+          if [ -z "${{ secrets.VPS_SSH_PRIVATE_KEY }}" ]; then
+            echo "Missing secret: VPS_SSH_PRIVATE_KEY (check repo/environment secrets)."
+            exit 1
+          fi
+
+      - name: Validate SSH connection secrets are present
+        run: |
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "Missing secret: VPS_HOST"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_SSH_PORT }}" ]; then
+            echo "Missing secret: VPS_SSH_PORT"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_SSH_USER }}" ]; then
+            echo "Missing secret: VPS_SSH_USER"
+            exit 1
+          fi
+
+      - name: Start SSH agent
+        run: |
+          set -e
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "${{ secrets.VPS_SSH_PRIVATE_KEY }}"
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+
+      - name: Add VPS host key
+        run: |
+          set -e
+          mkdir -p "$HOME/.ssh"
+          touch "$HOME/.ssh/known_hosts"
+          chmod 700 "$HOME/.ssh"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          if ! ssh-keyscan -p "${{ secrets.VPS_SSH_PORT }}" -H "${{ secrets.VPS_HOST }}" >> "$HOME/.ssh/known_hosts"; then
+            echo "Failed to fetch host key. Check VPS_HOST/VPS_SSH_PORT and network reachability."
+            exit 1
+          fi
+
+      - name: Deploy frontend via Docker Compose
+        run: |
+          ssh -p "${{ secrets.VPS_SSH_PORT }}" \
+              "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_HOST }}" \
+              "set -e && \
+               git config --global --add safe.directory '${{ secrets.VPS_FRONTEND_DIR }}' && \
+               cd '${{ secrets.VPS_FRONTEND_DIR }}' && \
+               git fetch origin --tags --prune '+refs/heads/*:refs/remotes/origin/*' && \
+               git checkout --force 'origin/${{ env.DEPLOY_BRANCH }}' && \
+               echo 'Frontend deployed commit:' && \
+               git rev-parse HEAD && \
+               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose build --build-arg CACHE_BUST=${{ github.sha }} frontend && \
+               APP_INSTANCE='prd' COMPOSE_PROJECT_NAME='sinmentiras-production' FRONTEND_BIND_IP='0.0.0.0' FRONTEND_PORT='8001' BACKEND_DIR='${{ secrets.VPS_BACKEND_DIR }}' BACKEND_ENV_FILE='${{ secrets.VPS_BACKEND_DIR }}/.env' docker compose up -d --no-deps frontend && \
                docker image prune -f"
 
